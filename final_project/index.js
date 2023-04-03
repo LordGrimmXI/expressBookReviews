@@ -11,10 +11,22 @@ app.use(express.json());
 app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
 
 app.use("/customer/auth/*", function auth(req,res,next){
-//Write the authenication mechanism here
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token) {
+    // Verify the access token using your authentication mechanism
+    // If the token is valid, set the user information in the session object
+    req.session.user = {
+      id: decodedToken.userId,
+      name: decodedToken.userName
+    };
+    next();
+  } else {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
 });
  
-const PORT =5000;
+const PORT = 8000;
 
 app.use("/customer", customer_routes);
 app.use("/", genl_routes);
